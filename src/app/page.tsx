@@ -25,7 +25,7 @@ import { NoticeTab, ContentTab } from '@/components/tabs/operation';
 import { AdminAccountTab, EnvironmentTab } from '@/components/tabs/settings';
 
 // Widgets
-import MessengerWidget from '@/components/MessengerWidget';
+import { MessengerWidget } from '@/components/widgets';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard_overview');
