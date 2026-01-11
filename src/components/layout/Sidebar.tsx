@@ -54,7 +54,7 @@ const MENU_STRUCTURE: MenuGroup[] = [
     subItems: [
       { id: 'data_voice', label: '음성 데이터 분석' },
       { id: 'data_report', label: '학습 리포트' },
-      { id: 'data_device', label: 'IoT 기기 현황' },
+      { id: 'data_device', label: 'NFC/QR 매핑' },
     ]
   },
   {

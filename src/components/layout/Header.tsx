@@ -18,7 +18,7 @@ const tabTitles: Record<TabType, string> = {
   // Data
   data_voice: '음성 데이터 분석',
   data_report: '학습 리포트',
-  data_device: 'IoT 기기 현황',
+  data_device: 'NFC/QR 매핑 관리',
 
   // Operation
   op_notice: '공지 및 알림',

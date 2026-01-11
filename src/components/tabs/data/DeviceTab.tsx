@@ -1,124 +1,296 @@
 'use client';
 
-const DEVICES = [
-  { id: 1, name: 'VOM-001', type: 'NFC 리더기', location: '수원시 A센터', status: 'online', battery: 95, lastSync: '방금 전' },
-  { id: 2, name: 'VOM-002', type: 'NFC 리더기', location: '수원시 B센터', status: 'online', battery: 78, lastSync: '5분 전' },
-  { id: 3, name: 'VOM-003', type: 'NFC 리더기', location: '화성시 C센터', status: 'offline', battery: 12, lastSync: '3시간 전' },
-  { id: 4, name: 'VOM-004', type: 'NFC 리더기', location: '용인시 D센터', status: 'online', battery: 100, lastSync: '1분 전' },
-  { id: 5, name: 'VOM-005', type: 'NFC 리더기', location: '수원시 A센터', status: 'maintenance', battery: 45, lastSync: '1일 전' },
-];
+import { useState, useEffect } from 'react';
+import {
+  fetchMappings,
+  fetchCardContents,
+  createMapping,
+  deleteMapping,
+  NfcCardMapping,
+  CardContent
+} from '@/lib/supabase';
 
 export default function DeviceTab() {
+  const [mappings, setMappings] = useState<NfcCardMapping[]>([]);
+  const [cardContents, setCardContents] = useState<CardContent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
+  // 새 매핑 폼
+  const [newMapping, setNewMapping] = useState({
+    nfc_tag_id: '',
+    qr_code: '',
+    card_id: '',
+    label: '',
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const [mappingsData, contentsData] = await Promise.all([
+      fetchMappings(),
+      fetchCardContents(),
+    ]);
+    setMappings(mappingsData);
+    setCardContents(contentsData);
+    setIsLoading(false);
+  };
+
+  const handleCreate = async () => {
+    if (!newMapping.card_id) {
+      alert('카드 콘텐츠를 선택해주세요.');
+      return;
+    }
+    if (!newMapping.nfc_tag_id && !newMapping.qr_code) {
+      alert('NFC 태그 ID 또는 QR 코드를 입력해주세요.');
+      return;
+    }
+
+    const success = await createMapping({
+      nfc_tag_id: newMapping.nfc_tag_id || undefined,
+      qr_code: newMapping.qr_code || undefined,
+      card_id: newMapping.card_id,
+      label: newMapping.label || undefined,
+    });
+
+    if (success) {
+      setShowModal(false);
+      setNewMapping({ nfc_tag_id: '', qr_code: '', card_id: '', label: '' });
+      loadData();
+    } else {
+      alert('매핑 생성에 실패했습니다.');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    const success = await deleteMapping(id);
+    if (success) {
+      loadData();
+    } else {
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
+  const nfcCount = mappings.filter(m => m.nfc_tag_id).length;
+  const qrCount = mappings.filter(m => m.qr_code).length;
+
   return (
     <div className="space-y-6">
-      {/* 기기 상태 요약 */}
+      {/* 상단 통계 */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-[18px] border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm font-bold text-gray-500">온라인</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-[#3182F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+              </svg>
+            </div>
+            <span className="text-[15px] font-bold text-gray-500">전체 매핑</span>
           </div>
-          <p className="text-3xl font-extrabold text-green-600">24</p>
+          <p className="text-[36px] font-extrabold text-[#191F28]">{mappings.length}</p>
         </div>
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-[18px] border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <span className="text-sm font-bold text-gray-500">오프라인</span>
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+              <span className="text-xl">📡</span>
+            </div>
+            <span className="text-[15px] font-bold text-gray-500">NFC 태그</span>
           </div>
-          <p className="text-3xl font-extrabold text-red-600">3</p>
+          <p className="text-[36px] font-extrabold text-purple-600">{nfcCount}</p>
         </div>
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-[18px] border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <span className="text-sm font-bold text-gray-500">점검 중</span>
+            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+              <span className="text-xl">📱</span>
+            </div>
+            <span className="text-[15px] font-bold text-gray-500">QR 코드</span>
           </div>
-          <p className="text-3xl font-extrabold text-yellow-600">2</p>
+          <p className="text-[36px] font-extrabold text-green-600">{qrCount}</p>
         </div>
-        <div className="bg-white rounded-[16px] border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-[18px] border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-            <span className="text-sm font-bold text-gray-500">배터리 부족</span>
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+              <span className="text-xl">📦</span>
+            </div>
+            <span className="text-[15px] font-bold text-gray-500">콘텐츠 수</span>
           </div>
-          <p className="text-3xl font-extrabold text-orange-600">4</p>
+          <p className="text-[36px] font-extrabold text-orange-600">{cardContents.length}</p>
         </div>
       </div>
 
-      {/* 기기 목록 */}
-      <div className="bg-white rounded-[16px] border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="text-base font-bold text-[#191F28]">IoT 기기 목록</h3>
+      {/* 매핑 목록 */}
+      <div className="bg-white rounded-[18px] border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+          <div>
+            <h3 className="text-[17px] font-bold text-[#191F28]">NFC/QR 매핑 관리</h3>
+            <p className="text-[13px] text-gray-400 mt-0.5">태그 UID와 학습 카드를 연결합니다</p>
+          </div>
           <div className="flex gap-2">
-            <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">
-              전체 동기화
+            <button
+              onClick={loadData}
+              className="px-4 py-2.5 border border-gray-200 rounded-xl text-[14px] font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              새로고침
             </button>
-            <button className="px-4 py-2 bg-[#3182F6] text-white rounded-lg text-sm font-bold hover:bg-[#1B64DA]">
-              + 기기 등록
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2.5 bg-[#3182F6] text-white rounded-xl text-[14px] font-bold hover:bg-[#1B64DA] transition-colors"
+            >
+              + 매핑 추가
             </button>
           </div>
         </div>
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">기기명</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">유형</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">설치 위치</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">상태</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">배터리</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">마지막 동기화</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500">관리</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {DEVICES.map((device) => (
-              <tr key={device.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-[10px] bg-blue-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-[#3182F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                      </svg>
-                    </div>
-                    <span className="font-bold text-[#191F28]">{device.name}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{device.type}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{device.location}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                    device.status === 'online' ? 'bg-green-50 text-green-600' :
-                    device.status === 'offline' ? 'bg-red-50 text-red-600' :
-                    'bg-yellow-50 text-yellow-600'
-                  }`}>
-                    {device.status === 'online' ? '온라인' :
-                     device.status === 'offline' ? '오프라인' : '점검 중'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          device.battery >= 50 ? 'bg-green-500' :
-                          device.battery >= 20 ? 'bg-yellow-500' :
-                          'bg-red-500'
-                        }`}
-                        style={{ width: `${device.battery}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600">{device.battery}%</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{device.lastSync}</td>
-                <td className="px-6 py-4">
-                  <button className="text-[#3182F6] text-sm font-bold hover:underline">
-                    상세보기
-                  </button>
-                </td>
+
+        {isLoading ? (
+          <div className="p-12 text-center text-gray-400">
+            <div className="animate-spin w-8 h-8 border-2 border-[#3182F6] border-t-transparent rounded-full mx-auto mb-3"></div>
+            데이터를 불러오는 중...
+          </div>
+        ) : mappings.length === 0 ? (
+          <div className="p-12 text-center text-gray-400">
+            <span className="text-4xl mb-3 block">📡</span>
+            등록된 매핑이 없습니다.<br />
+            <span className="text-[13px]">Flutter Admin 앱에서 NFC 태그를 스캔하여 등록하거나,<br />위 버튼을 눌러 수동으로 추가하세요.</span>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">유형</th>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">태그 ID / QR</th>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">연결된 콘텐츠</th>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">라벨</th>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">등록일</th>
+                <th className="px-6 py-3.5 text-left text-[13px] font-bold text-gray-500">관리</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {mappings.map((mapping) => (
+                <tr key={mapping.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${
+                      mapping.nfc_tag_id
+                        ? 'bg-purple-50 text-purple-600'
+                        : 'bg-green-50 text-green-600'
+                    }`}>
+                      {mapping.nfc_tag_id ? '📡 NFC' : '📱 QR'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <code className="text-[14px] font-mono bg-gray-100 px-2 py-1 rounded text-gray-700">
+                      {mapping.nfc_tag_id || mapping.qr_code}
+                    </code>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{mapping.card_contents?.icon || '📦'}</span>
+                      <span className="text-[15px] font-bold text-[#191F28]">
+                        {mapping.card_contents?.name || mapping.card_id}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-[14px] text-gray-500">
+                    {mapping.label || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-[14px] text-gray-500">
+                    {new Date(mapping.created_at).toLocaleDateString('ko-KR')}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => handleDelete(mapping.id)}
+                      className="text-red-500 text-[14px] font-bold hover:underline"
+                    >
+                      삭제
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
+
+      {/* 추가 모달 */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[20px] p-8 w-full max-w-md shadow-2xl">
+            <h3 className="text-[19px] font-bold text-[#191F28] mb-6">새 매핑 추가</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-bold text-gray-500 mb-2">NFC 태그 ID</label>
+                <input
+                  type="text"
+                  placeholder="예: 04:A2:B3:C4:D5:E6:F7"
+                  value={newMapping.nfc_tag_id}
+                  onChange={(e) => setNewMapping({ ...newMapping, nfc_tag_id: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6] border border-transparent"
+                />
+              </div>
+
+              <div className="text-center text-[13px] text-gray-400">또는</div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-gray-500 mb-2">QR 코드 값</label>
+                <input
+                  type="text"
+                  placeholder="예: VOM-CARD-001"
+                  value={newMapping.qr_code}
+                  onChange={(e) => setNewMapping({ ...newMapping, qr_code: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6] border border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-gray-500 mb-2">연결할 콘텐츠 *</label>
+                <select
+                  value={newMapping.card_id}
+                  onChange={(e) => setNewMapping({ ...newMapping, card_id: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6] border border-transparent"
+                >
+                  <option value="">선택하세요</option>
+                  {cardContents.map((card) => (
+                    <option key={card.id} value={card.id}>
+                      {card.icon} {card.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-bold text-gray-500 mb-2">라벨 (선택)</label>
+                <input
+                  type="text"
+                  placeholder="예: 서울센터-체온계-01"
+                  value={newMapping.label}
+                  onChange={(e) => setNewMapping({ ...newMapping, label: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl text-[15px] outline-none focus:ring-2 focus:ring-[#3182F6] border border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 py-3 border border-gray-200 rounded-xl text-[15px] font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleCreate}
+                className="flex-1 py-3 bg-[#3182F6] text-white rounded-xl text-[15px] font-bold hover:bg-[#1B64DA] transition-colors"
+              >
+                추가
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
