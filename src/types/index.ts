@@ -28,6 +28,19 @@ export interface NavItem {
   icon: React.ComponentType;
 }
 
-export type TabType = 'dashboard' | 'users' | 'voice' | 'settings';
+// 새로운 세부 탭 타입
+export type TabType =
+  | 'dashboard_overview'
+  | 'dashboard_live'
+  | 'users_list'
+  | 'users_group'
+  | 'data_voice'
+  | 'data_report'
+  | 'data_device'
+  | 'op_notice'
+  | 'op_content'
+  | 'set_admin'
+  | 'set_env';
+
 export type LoginType = 'center' | 'admin';
 export type UserType = 'multicultural' | 'government';

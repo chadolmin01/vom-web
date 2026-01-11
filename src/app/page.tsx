@@ -8,13 +8,24 @@ import { FONT_STYLE, SAMPLE_USERS, SAMPLE_CARDS, SAMPLE_VOICES } from '@/constan
 import LoginScreen from '@/components/LoginScreen';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import DashboardTab from '@/components/dashboard';
-import UsersTab from '@/components/tabs/UsersTab';
-import VoiceTab from '@/components/tabs/VoiceTab';
-import SettingsTab from '@/components/tabs/SettingsTab';
+
+// Dashboard Tabs
+import { OverviewTab, LiveMonitorTab } from '@/components/tabs/dashboard';
+
+// Users Tabs
+import { UsersListTab, UsersGroupTab } from '@/components/tabs/users';
+
+// Data Tabs
+import { VoiceDataTab, ReportTab, DeviceTab } from '@/components/tabs/data';
+
+// Operation Tabs
+import { NoticeTab, ContentTab } from '@/components/tabs/operation';
+
+// Settings Tabs
+import { AdminAccountTab, EnvironmentTab } from '@/components/tabs/settings';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard_overview');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -49,6 +60,46 @@ export default function AdminDashboard() {
   const handleLogin = () => setIsLoggedIn(true);
   const handleLogout = () => setIsLoggedIn(false);
 
+  // 탭 렌더링 함수
+  const renderTabContent = () => {
+    switch (activeTab) {
+      // Dashboard
+      case 'dashboard_overview':
+        return <OverviewTab logs={logs} />;
+      case 'dashboard_live':
+        return <LiveMonitorTab logs={logs} />;
+
+      // Users
+      case 'users_list':
+        return <UsersListTab />;
+      case 'users_group':
+        return <UsersGroupTab />;
+
+      // Data
+      case 'data_voice':
+        return <VoiceDataTab />;
+      case 'data_report':
+        return <ReportTab />;
+      case 'data_device':
+        return <DeviceTab />;
+
+      // Operation
+      case 'op_notice':
+        return <NoticeTab />;
+      case 'op_content':
+        return <ContentTab />;
+
+      // Settings
+      case 'set_admin':
+        return <AdminAccountTab />;
+      case 'set_env':
+        return <EnvironmentTab onLogout={handleLogout} />;
+
+      default:
+        return <OverviewTab logs={logs} />;
+    }
+  };
+
   // 로그인 전 화면
   if (!isLoggedIn) {
     return <LoginScreen onLogin={handleLogin} />;
@@ -68,10 +119,7 @@ export default function AdminDashboard() {
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 scroll-smooth">
           <div className="w-full space-y-6">
-            {activeTab === 'dashboard' && <DashboardTab logs={logs} />}
-            {activeTab === 'users' && <UsersTab />}
-            {activeTab === 'voice' && <VoiceTab />}
-            {activeTab === 'settings' && <SettingsTab onLogout={handleLogout} />}
+            {renderTabContent()}
           </div>
         </div>
       </main>

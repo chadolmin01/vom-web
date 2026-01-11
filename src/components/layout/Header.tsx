@@ -7,10 +7,26 @@ interface HeaderProps {
 }
 
 const tabTitles: Record<TabType, string> = {
-  dashboard: '대시보드',
-  users: '대상자 목록',
-  voice: '음성 데이터 분석',
-  settings: '환경 설정',
+  // Dashboard
+  dashboard_overview: '종합 현황',
+  dashboard_live: '실시간 모니터링',
+
+  // Users
+  users_list: '전체 대상자',
+  users_group: '그룹 관리',
+
+  // Data
+  data_voice: '음성 데이터 분석',
+  data_report: '학습 리포트',
+  data_device: 'IoT 기기 현황',
+
+  // Operation
+  op_notice: '공지 및 알림',
+  op_content: '콘텐츠 관리',
+
+  // Settings
+  set_admin: '관리자 계정',
+  set_env: '환경 설정',
 };
 
 export default function Header({ activeTab }: HeaderProps) {
