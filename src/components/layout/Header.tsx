@@ -37,15 +37,15 @@ export default function Header({ activeTab }: HeaderProps) {
   });
 
   return (
-    <header className="h-[72px] bg-white border-b border-gray-200 flex justify-between items-center px-8 shrink-0 z-10">
-      <h2 className="text-xl font-bold text-[#191F28]">
+    <header className="h-[76px] bg-white border-b border-gray-200 flex justify-between items-center px-8 shrink-0 z-10">
+      <h2 className="text-[22px] font-bold text-[#191F28]">
         {tabTitles[activeTab]}
       </h2>
       <div className="flex gap-3">
-        <div className="h-9 px-4 flex items-center bg-[#F9FAFB] border border-[#E5E8EB] rounded-[8px] text-sm text-[#8B95A1]">
+        <div className="h-10 px-4 flex items-center bg-[#F9FAFB] border border-[#E5E8EB] rounded-[10px] text-[15px] text-[#8B95A1]">
           <span className="mr-2">📅</span> {today}
         </div>
-        <button className="h-9 px-4 bg-[#3182F6] text-white rounded-[8px] text-sm font-bold hover:bg-[#1B64DA] transition-colors shadow-sm">
+        <button className="h-10 px-5 bg-[#3182F6] text-white rounded-[10px] text-[15px] font-bold hover:bg-[#1B64DA] transition-colors shadow-sm">
           리포트 생성
         </button>
       </div>

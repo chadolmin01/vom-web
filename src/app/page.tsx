@@ -24,6 +24,9 @@ import { NoticeTab, ContentTab } from '@/components/tabs/operation';
 // Settings Tabs
 import { AdminAccountTab, EnvironmentTab } from '@/components/tabs/settings';
 
+// Widgets
+import MessengerWidget from '@/components/MessengerWidget';
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard_overview');
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -123,6 +126,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+
+      {/* 우하단 메신저 위젯 */}
+      <MessengerWidget />
     </div>
   );
 }

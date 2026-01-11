@@ -103,17 +103,21 @@ const doughnutChartOptions = {
   },
 };
 
-export default function Charts() {
+interface ChartsProps {
+  period?: string;
+}
+
+export default function Charts({ period }: ChartsProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
 
   return (
     <div className="grid grid-cols-12 gap-6">
       {/* Main Line Chart */}
-      <div className="col-span-8 bg-white p-7 rounded-[16px] border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+      <div className="col-span-8 bg-white p-7 rounded-[18px] border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-[#191F28]">주간 학습 참여 추이</h3>
+          <h3 className="text-[19px] font-bold text-[#191F28]">주간 학습 참여 추이</h3>
           <div className="flex gap-2">
-            <select className="text-sm font-medium text-[#4E5968] bg-[#F9FAFB] border border-[#E5E8EB] rounded-[6px] px-2 py-1 outline-none">
+            <select className="text-[15px] font-medium text-[#4E5968] bg-[#F9FAFB] border border-[#E5E8EB] rounded-[6px] px-3 py-1.5 outline-none">
               <option>최근 7일</option>
               <option>최근 30일</option>
             </select>
@@ -125,25 +129,25 @@ export default function Charts() {
       </div>
 
       {/* Side Doughnut Chart */}
-      <div className="col-span-4 bg-white p-7 rounded-[16px] border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col">
-        <h3 className="text-lg font-bold text-[#191F28] mb-6">학습 유형 분석</h3>
+      <div className="col-span-4 bg-white p-7 rounded-[18px] border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col">
+        <h3 className="text-[19px] font-bold text-[#191F28] mb-6">학습 유형 분석</h3>
         <div className="flex-1 flex items-center justify-center relative">
           <div className="w-[220px] h-[220px]">
             <Doughnut data={doughnutChartData} options={doughnutChartOptions} />
           </div>
           <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-            <span className="text-4xl font-extrabold text-[#191F28]">72%</span>
-            <span className="text-xs font-bold text-[#8B95A1] mt-1">참여형 학습</span>
+            <span className="text-[44px] font-extrabold text-[#191F28]">72%</span>
+            <span className="text-[13px] font-bold text-[#8B95A1] mt-1">참여형 학습</span>
           </div>
         </div>
         <div className="flex gap-2 mt-4">
           <div className="flex-1 p-3 bg-[#F9FAFB] rounded-[8px] text-center">
-            <div className="text-xs text-[#8B95A1]">따라하기</div>
-            <div className="font-bold text-[#3182F6]">72%</div>
+            <div className="text-[13px] text-[#8B95A1]">따라하기</div>
+            <div className="font-bold text-[#3182F6] text-[15px]">72%</div>
           </div>
           <div className="flex-1 p-3 bg-[#F9FAFB] rounded-[8px] text-center">
-            <div className="text-xs text-[#8B95A1]">듣기</div>
-            <div className="font-bold text-[#6B7684]">28%</div>
+            <div className="text-[13px] text-[#8B95A1]">듣기</div>
+            <div className="font-bold text-[#6B7684] text-[15px]">28%</div>
           </div>
         </div>
       </div>
