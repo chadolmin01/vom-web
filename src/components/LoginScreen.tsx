@@ -42,8 +42,8 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
-  const [loginId, setLoginId] = useState('');
-  const [loginPw, setLoginPw] = useState('');
+  const [loginId, setLoginId] = useState('admin');
+  const [loginPw, setLoginPw] = useState('1234');
   const [adminCode, setAdminCode] = useState('');
   
   const [loginType, setLoginType] = useState<'center' | 'admin'>('center');

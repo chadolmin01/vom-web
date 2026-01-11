@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { TabType } from '@/types';
+import AlertModal from '@/components/widgets/AlertModal';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -30,6 +32,8 @@ const tabTitles: Record<TabType, string> = {
 };
 
 export default function Header({ activeTab }: HeaderProps) {
+  const [showAlert, setShowAlert] = useState(false);
+
   const today = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -37,18 +41,32 @@ export default function Header({ activeTab }: HeaderProps) {
   });
 
   return (
-    <header className="h-[76px] bg-white border-b border-gray-200 flex justify-between items-center px-8 shrink-0 z-10">
-      <h2 className="text-[22px] font-bold text-[#191F28]">
-        {tabTitles[activeTab]}
-      </h2>
-      <div className="flex gap-3">
-        <div className="h-10 px-4 flex items-center bg-[#F9FAFB] border border-[#E5E8EB] rounded-[10px] text-[15px] text-[#8B95A1]">
-          <span className="mr-2">📅</span> {today}
+    <>
+      <header className="h-[76px] bg-white border-b border-gray-200 flex justify-between items-center px-8 shrink-0 z-10">
+        <h2 className="text-[22px] font-bold text-[#191F28]">
+          {tabTitles[activeTab]}
+        </h2>
+        <div className="flex gap-3">
+          <div className="h-10 px-4 flex items-center bg-[#F9FAFB] border border-[#E5E8EB] rounded-[10px] text-[15px] text-[#8B95A1]">
+            <span className="mr-2">📅</span> {today}
+          </div>
+          <button
+            onClick={() => setShowAlert(true)}
+            className="h-10 px-5 bg-[#3182F6] text-white rounded-[10px] text-[15px] font-bold hover:bg-[#1B64DA] transition-colors shadow-sm"
+          >
+            리포트 생성
+          </button>
         </div>
-        <button className="h-10 px-5 bg-[#3182F6] text-white rounded-[10px] text-[15px] font-bold hover:bg-[#1B64DA] transition-colors shadow-sm">
-          리포트 생성
-        </button>
-      </div>
-    </header>
+      </header>
+
+      <AlertModal
+        isOpen={showAlert}
+        type="info"
+        title="준비 중인 기능입니다"
+        description="리포트 생성 기능은 현재 개발 중입니다.\n빠른 시일 내에 제공될 예정입니다."
+        onClose={() => setShowAlert(false)}
+        confirmText="확인"
+      />
+    </>
   );
 }
